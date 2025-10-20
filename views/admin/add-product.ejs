@@ -9,7 +9,7 @@
     <main>
         <%- include('../includes/errorMessage.ejs') %>
         <%- include('../includes/infoMessage.ejs') %>
-        <form class="product-form" action="/admin/add-product" method="POST">
+        <form class="product-form" action="/admin/add-product" method="POST" enctype="multipart/form-data">
             <%- include("../includes/form-input.ejs", {
                 id: "title",
                 label: "Title",
@@ -19,10 +19,10 @@
             }) %>
             <%- include("../includes/form-input.ejs", {
                 id: "imageUrl",
-                label: "Image URL",
-                type: "text",
+                label: "Image File",
+                type: "file",
                 errorMessage: errorMessage ?? [],
-                oldInput: oldInput ?? {},
+                oldInput: undefined,
             }) %>
             <%- include("../includes/form-input.ejs", {
                 id: "price",

@@ -20,7 +20,9 @@ export const getAddProduct = (req, res, next) => {
 };
 
 export const postAddProduct = async (req, res, next) => {
-  const { title, imageUrl, description, price } = req.body;
+  const { title, description, price } = req.body;
+  const imageUrl = req?.file.path;
+
   const { didSucceed, details = PLACEHOLDER_DETAILS } =
     await Product.addProduct({
       title,
@@ -72,7 +74,11 @@ export const getEditProduct = async (req, res, next) => {
 
 export const postEditProduct = async (req, res, next) => {
   const id = req.body.productId;
-  const { title, price, description, imageUrl } = req.body;
+  const { title, price, description } = req.body;
+  const imageUrl = req.file
+    ? `/images/${req.file.filename}`
+    : req.body.existingImageUrl;
+
   const { didSucceed, details = PLACEHOLDER_DETAILS } =
     await Product.editProductById(
       id,

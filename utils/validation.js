@@ -65,8 +65,31 @@ function validateTitle() {
   ];
 }
 
-function validateImageUrl() {
-  return [body("imageUrl").trim().isURL().withMessage("Invalid image URL")];
+function validateImageFile() {
+  return [
+    body("imageUrl").custom((value, { req }) => {
+      const allowedTypes = /jpeg|jpg|png/;
+
+      if (req.file) {
+        const isAllowedType = allowedTypes.test(req.file.mimetype);
+        if (!isAllowedType) {
+          throw new Error(
+            "Accepted image file extension is .jpeg / .jpg / .png"
+          );
+        }
+        return true;
+      }
+
+      if (
+        req.body.existingImageUrl &&
+        req.body.existingImageUrl.trim() !== ""
+      ) {
+        return true;
+      }
+
+      throw new Error("Please upload an image file or keep the existing one");
+    }),
+  ];
 }
 
 function validatePrice() {
@@ -112,7 +135,7 @@ function validateResetPasswordForm() {
 function validateAddProductForm() {
   return [
     ...validateTitle(),
-    ...validateImageUrl(),
+    ...validateImageFile(),
     ...validatePrice(),
     ...validateDescription(),
   ];

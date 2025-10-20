@@ -2,6 +2,7 @@ import path from "path";
 import express from "express";
 import cookieParser from "cookie-parser";
 
+import multer from "./config/multer.js";
 import sessionMiddleware from "./config/session.js";
 import csrfProtection from "./config/csrf.js";
 import flash from "./config/connect-flash.js";
@@ -12,11 +13,15 @@ import attachLocals from "./middleware/attachLocals.js";
 import * as errorController from "./controllers/error.js";
 
 const app = express();
+const __dirname = process.cwd();
+
 app.set("view engine", "ejs");
 app.set("views", "views");
 
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static(path.join(process.cwd(), "public")));
+app.use(multer);
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 app.use(cookieParser());
 
 app.use(sessionMiddleware());
