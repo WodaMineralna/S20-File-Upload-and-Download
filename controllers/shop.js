@@ -81,6 +81,31 @@ export async function postOrder(req, res, next) {
   return res.redirect("/orders");
 }
 
+export async function getInvoice(req, res, next) {
+  const orderId = req.params.orderId;
+  const {
+    didSucceed,
+    details = PLACEHOLDER_DETAILS,
+    stream,
+    invoiceName,
+  } = await req.user.getInvoice(orderId, req.user._id);
+
+  if (!didSucceed) {
+    req.flash("error", details);
+    return res.redirect("/products");
+  }
+  if (didSucceed) {
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename='${invoiceName}'`);
+
+    stream.pipe(res);
+    stream.on("error", (err) => {
+      log("error", `Stream error for invoice "${invoiceName}": ${err.message}`);
+      if (!res.headersSent) res.status(500).send("Error streaming invoice");
+    });
+  }
+}
+
 export default {
   getIndex,
   getProductsPage,
@@ -90,4 +115,5 @@ export default {
   postDeleteCart,
   getOrders,
   postOrder,
+  getInvoice,
 };

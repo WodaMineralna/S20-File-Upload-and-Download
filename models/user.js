@@ -1,3 +1,6 @@
+import path from "path";
+import * as fs from "node:fs";
+
 import mongoose from "mongoose";
 import { newError, createLogger } from "../utils/index.js";
 
@@ -6,7 +9,6 @@ import Product from "./product.js";
 
 const { Schema } = mongoose;
 const log = createLogger(import.meta.url);
-
 
 const userSchema = new Schema({
   email: {
@@ -179,6 +181,51 @@ userSchema.methods.addOrder = async function () {
   } catch (error) {
     log("error", error);
     throw newError("Failed to add an order", error);
+  }
+};
+
+userSchema.methods.getInvoice = async function (orderId, sessionUserId) {
+  try {
+    const matchingOrder = await Order.findById(orderId);
+    // log("info", `Order data: ${matchingOrder}`); // DEBUGGING
+
+    if (!matchingOrder) {
+      log("warn", `Order with ID ${orderId} not found`);
+      return {
+        didSucceed: false,
+        details: { message: "File not found or an error has occured" },
+      };
+    }
+    if (matchingOrder.user.userId.toString() !== sessionUserId.toString()) {
+      log(
+        "warn",
+        `Session user ID ${sessionUserId} unauthorized to retrieve invoice of order ${orderId}`
+      );
+      return {
+        didSucceed: false,
+        details: { message: "Unauthorized" },
+      };
+    }
+
+    const invoiceName = `invoice-${orderId}.pdf`;
+    const invoicePath = path.join("data", "invoices", invoiceName);
+
+    await fs.promises.access(invoicePath, fs.constants.F_OK);
+    const stream = fs.createReadStream(invoicePath);
+    log("success", `Invoice "${invoiceName}" downloaded`);
+
+    return {
+      didSucceed: true,
+      details: { message: "Invoice retrieved successfully" },
+      stream,
+      invoiceName,
+    };
+  } catch (error) {
+    log("error", error);
+    return {
+      didSucceed: false,
+      details: { message: "Invoice not found or an error has occured" },
+    };
   }
 };
 

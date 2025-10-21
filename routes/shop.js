@@ -50,4 +50,12 @@ router.post(
   catchErrAsync(shopController.postOrder)
 );
 
+router.get(
+  "/orders/:orderId",
+  isAuthed(),
+  validateObjectId("orderId"),
+  handleValidation("/orders", { redirect: true }),
+  catchErrAsync(shopController.getInvoice)
+);
+
 export default router;
