@@ -76,7 +76,7 @@ export const postEditProduct = async (req, res, next) => {
   const id = req.body.productId;
   const { title, price, description } = req.body;
   const imageUrl = req.file
-    ? `/images/${req.file.filename}`
+    ? `images/${req.file.filename}`
     : req.body.existingImageUrl;
 
   const { didSucceed, details = PLACEHOLDER_DETAILS } =
