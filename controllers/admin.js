@@ -74,6 +74,8 @@ export const getEditProduct = async (req, res, next) => {
 
 export const postEditProduct = async (req, res, next) => {
   const id = req.body.productId;
+  const existingImageUrl = req.body.existingImageUrl;
+
   const { title, price, description } = req.body;
   const imageUrl = req.file
     ? `images/${req.file.filename}`
@@ -86,6 +88,7 @@ export const postEditProduct = async (req, res, next) => {
       price,
       description,
       imageUrl,
+      existingImageUrl,
       req.user._id
     );
 

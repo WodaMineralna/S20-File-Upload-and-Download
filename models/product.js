@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { newError, createLogger } from "../utils/index.js";
+import { newError, createLogger, removeFile } from "../utils/index.js";
 
 const { Schema } = mongoose;
 const log = createLogger(import.meta.url);
@@ -49,6 +49,7 @@ productSchema.statics.editProductById = async function (
   price,
   description,
   imageUrl,
+  existingImageUrl,
   userId
 ) {
   try {
@@ -77,6 +78,12 @@ productSchema.statics.editProductById = async function (
           message: "No changes detected in the product data",
         },
       };
+    }
+
+    // ^ if image was edited (if product imageUrl was changed), remove previous image file from '/images'
+    if (imageUrl !== existingImageUrl) {
+      log("info", `Removed image '${imageUrl}' from '/images'`);
+      removeFile(existingImageUrl);
     }
 
     log("success", "Product updated");
@@ -122,6 +129,7 @@ productSchema.statics.addProduct = async function (productData) {
 productSchema.statics.deleteProduct = async function (id, userId) {
   try {
     userId = userId.toString();
+    const product = await this.findById(id);
     const deletedProduct = await this.deleteOne({ _id: id, userId });
 
     if (deletedProduct.deletedCount === 0) {
@@ -133,6 +141,9 @@ productSchema.statics.deleteProduct = async function (id, userId) {
         },
       };
     }
+
+    log("info", `Removed image '${product.imageUrl}' from '/images'`);
+    removeFile(product.imageUrl);
 
     log("success", "Product deleted");
     return {

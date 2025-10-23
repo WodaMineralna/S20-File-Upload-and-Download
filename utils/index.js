@@ -5,6 +5,7 @@ import requireEnvVar from "./requireEnvVar.js";
 import sendEmail from "./sendEmail.js";
 import * as validation from "./validation.js";
 import fillInvoicePDF from "./fillInvoicePDF.js";
+import removeFile from "./removeFile.js";
 
 export {
   catchErrAsync,
@@ -13,5 +14,6 @@ export {
   requireEnvVar,
   sendEmail,
   validation,
-  fillInvoicePDF
+  fillInvoicePDF,
+  removeFile,
 };
