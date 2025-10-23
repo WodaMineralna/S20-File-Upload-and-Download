@@ -186,17 +186,17 @@ userSchema.methods.addOrder = async function () {
 
 userSchema.methods.getInvoice = async function (orderId, sessionUserId) {
   try {
-    const matchingOrder = await Order.findById(orderId);
-    // log("info", `Order data: ${matchingOrder}`); // DEBUGGING
+    const orderData = await Order.findById(orderId);
+    log("info", `Order data: ${orderData}`); // DEBUGGING
 
-    if (!matchingOrder) {
+    if (!orderData) {
       log("warn", `Order with ID ${orderId} not found`);
       return {
         didSucceed: false,
         details: { message: "File not found or an error has occured" },
       };
     }
-    if (matchingOrder.user.userId.toString() !== sessionUserId.toString()) {
+    if (orderData.user.userId.toString() !== sessionUserId.toString()) {
       log(
         "warn",
         `Session user ID ${sessionUserId} unauthorized to retrieve invoice of order ${orderId}`
@@ -208,17 +208,15 @@ userSchema.methods.getInvoice = async function (orderId, sessionUserId) {
     }
 
     const invoiceName = `invoice-${orderId}.pdf`;
-    const invoicePath = path.join("data", "invoices", invoiceName);
-
-    await fs.promises.access(invoicePath, fs.constants.F_OK);
-    const stream = fs.createReadStream(invoicePath);
-    log("success", `Invoice "${invoiceName}" downloaded`);
 
     return {
       didSucceed: true,
       details: { message: "Invoice retrieved successfully" },
-      stream,
-      invoiceName,
+      invoice: {
+        orderId,
+        orderData,
+        invoiceName,
+      },
     };
   } catch (error) {
     log("error", error);

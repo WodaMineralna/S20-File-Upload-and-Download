@@ -1,3 +1,6 @@
+import PDFDocument from "pdfkit-table";
+
+import fillInvoicePDF from "../utils/fillInvoicePDF.js";
 import Product from "../models/product.js";
 
 const PLACEHOLDER_DETAILS = { cause: null, message: "Something went wrong..." };
@@ -86,8 +89,7 @@ export async function getInvoice(req, res, next) {
   const {
     didSucceed,
     details = PLACEHOLDER_DETAILS,
-    stream,
-    invoiceName,
+    invoice,
   } = await req.user.getInvoice(orderId, req.user._id);
 
   if (!didSucceed) {
@@ -95,13 +97,27 @@ export async function getInvoice(req, res, next) {
     return res.redirect("/products");
   }
   if (didSucceed) {
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `inline; filename='${invoiceName}'`);
+    const doc = new PDFDocument();
 
-    stream.pipe(res);
-    stream.on("error", (err) => {
-      log("error", `Stream error for invoice "${invoiceName}": ${err.message}`);
-      if (!res.headersSent) res.status(500).send("Error streaming invoice");
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename='${invoice.invoiceName}'`
+    );
+
+    doc.pipe(res);
+    await fillInvoicePDF(doc, invoice);
+    doc.end();
+
+    doc.on("error", (err) => {
+      log(
+        "error",
+        `Stream error for invoice PDF "${invoiceName}": ${err.message}`
+      );
+      if (!res.headersSent) {
+        log("error", `Error streaming invoice PDF: ${err.message}`);
+        res.status(500).send(`Error streaming invoice PDF: ${err.message}`);
+      }
     });
   }
 }
