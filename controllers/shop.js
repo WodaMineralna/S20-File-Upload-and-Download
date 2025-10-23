@@ -102,7 +102,7 @@ export async function getInvoice(req, res, next) {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `inline; filename='${invoice.invoiceName}'`
+      `inline; filename=${invoice.invoiceName}`
     );
 
     doc.pipe(res);
