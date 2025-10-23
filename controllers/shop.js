@@ -1,6 +1,6 @@
 import PDFDocument from "pdfkit-table";
 
-import fillInvoicePDF from "../utils/fillInvoicePDF.js";
+import { fillInvoicePDF } from "../utils/index.js";
 import Product from "../models/product.js";
 
 const PLACEHOLDER_DETAILS = { cause: null, message: "Something went wrong..." };

@@ -4,6 +4,7 @@ import newError from "./newError.js";
 import requireEnvVar from "./requireEnvVar.js";
 import sendEmail from "./sendEmail.js";
 import * as validation from "./validation.js";
+import fillInvoicePDF from "./fillInvoicePDF.js";
 
 export {
   catchErrAsync,
@@ -12,4 +13,5 @@ export {
   requireEnvVar,
   sendEmail,
   validation,
+  fillInvoicePDF
 };
