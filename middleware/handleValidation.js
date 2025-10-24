@@ -1,5 +1,5 @@
 import { validationResult } from "express-validator";
-import { createLogger } from "../utils/index.js";
+import { createLogger, removeFile } from "../utils/index.js";
 
 const log = createLogger(import.meta.url);
 
@@ -15,6 +15,17 @@ export default function handleValidation(viewPath, fixedLocals) {
 
     const errors = validationResult(req);
     if (errors.isEmpty()) return next();
+
+    // ^ checks if a file was uploaded (during product creation / edit) and deletes it using removeFile() [fs.unlink()]
+    const fileName = req?.file?.filename;
+    if (fileName !== undefined) {
+      log(
+        "info",
+        `File '${fileName}' deleted from '/images' due to form validation errors`
+      );
+      const filePath = `images/${fileName}`;
+      removeFile(filePath);
+    }
 
     const errorMessage = errors.errors.map(
       (error) => new Object({ cause: error.path, message: error.msg })
