@@ -40,7 +40,9 @@ export default function handleValidation(viewPath, fixedLocals) {
       oldInput: {
         email: req.body.email && req.body.email !== "@" ? req.body.email : "",
         title: req.body.title ?? "",
-        imageUrl: req.body.imageUrl ?? "",
+        imageUrl: req.body.existingImageUrl
+          ? req.body.imageUrl ?? req.body.existingImageUrl
+          : "",
         price: req.body.price ?? "",
         description: req.body.description ?? "",
       },
