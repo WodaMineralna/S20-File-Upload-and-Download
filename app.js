@@ -2,7 +2,7 @@ import path from "path";
 import express from "express";
 import cookieParser from "cookie-parser";
 
-import multer from "./config/multer.js";
+import multerConfig from "./config/multer.js";
 import sessionMiddleware from "./config/session.js";
 import csrfProtection from "./config/csrf.js";
 import flash from "./config/connect-flash.js";
@@ -19,7 +19,7 @@ app.set("view engine", "ejs");
 app.set("views", "views");
 
 app.use(express.urlencoded({ extended: false }));
-app.use(multer);
+app.use(multerConfig);
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use(cookieParser());
