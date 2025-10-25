@@ -1,6 +1,3 @@
-import path from "path";
-import * as fs from "node:fs";
-
 import mongoose from "mongoose";
 import { newError, createLogger } from "../utils/index.js";
 
@@ -41,12 +38,51 @@ const userSchema = new Schema({
   },
 });
 
+// NOTE: This logic could be optimized using built-in Mongoose methods
+// (e.g. $in queries). For now I’m keeping it simple and explicit,
+// since I haven’t done a deep-dive into MongoDB yet - for now I'm focusing on the current NodeJS course
+// MongoDB course coming soon :) - as mentioned in my GitHub profile README
 userSchema.methods.getCart = async function () {
   try {
-    const userData = await this.populate("cart.items.productId");
-    // console.log("Cart items:", userData); // DEBUGGING
+    // * handles situations where user added a product to cart and it was deleted from DB in the meantime
+    // ^ stores an array of deleted products (ID) in users cart
+    const deletedItemsInCart = (
+      await Promise.all(
+        this.cart.items.map(async (cartItem) => {
+          // console.log(cartItem.productId); // DEBUGGING
+          const product = await Product.findById(cartItem.productId);
+          if (!product) return cartItem.productId;
+          return null;
+        })
+      )
+    ).filter(Boolean);
+    log(
+      "warn",
+      `Items found in cart that are no longer available (were deleted): ${deletedItemsInCart}`
+    ); // DEBUGGING
 
-    return userData.cart.items;
+    let warningDetails;
+    if (deletedItemsInCart.length > 0) {
+      // ^ filters deleted items from this.cart.items based on 'deletedItemsInCart'
+      const updatedCart = this.cart.items.filter(
+        (cartItem) => !deletedItemsInCart.includes(cartItem.productId)
+      );
+      log("warn", "Cart successfuly filtered from deleted products"); // DEBUGGING
+
+      this.cart.items = updatedCart;
+      await this.save();
+
+      warningDetails = [
+        {
+          message: `Some items were removed from your cart automatically, because they're no longer available`,
+        },
+      ];
+    }
+
+    const userData = await this.populate("cart.items.productId");
+    // log("info", userData.cart.items); // DEBUGGING
+
+    return { details: warningDetails, cartItems: userData.cart.items };
   } catch (error) {
     log("error", error);
     throw newError("Failed to get cart data", error);

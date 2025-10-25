@@ -41,12 +41,13 @@ export async function getProduct(req, res, next) {
 }
 
 export async function getCart(req, res, next) {
-  const cartItems = await req.user.getCart();
+  const { details, cartItems } = await req.user.getCart();
 
   return res.render("shop/cart", {
     products: cartItems,
     path: "/cart",
     pageTitle: "Your Cart",
+    infoMessage: details && details,
   });
 }
 
