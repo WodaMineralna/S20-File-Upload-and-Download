@@ -79,9 +79,11 @@ export async function getOrders(req, res, next) {
 }
 
 export async function postOrder(req, res, next) {
-  await req.user.addOrder();
+  const { didSucceed, details = PLACEHOLDER_DETAILS } =
+    await req.user.addOrder();
 
-  return res.redirect("/orders");
+  req.flash(didSucceed ? "info" : "error", details);
+  return res.redirect("/products");
 }
 
 export async function getInvoice(req, res, next) {

@@ -177,10 +177,15 @@ userSchema.methods.addOrder = async function () {
 
     await order.save();
     await this.clearCart();
+
     log("success", "Order created");
+    return { didSucceed: true, details: { message: "Order created!" } };
   } catch (error) {
     log("error", error);
-    throw newError("Failed to add an order", error);
+    return {
+      didSucceed: false,
+      details: { message: `Failed to create new order: ${error}` },
+    };
   }
 };
 
