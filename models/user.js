@@ -56,18 +56,19 @@ userSchema.methods.getCart = async function () {
         })
       )
     ).filter(Boolean);
-    log(
-      "warn",
-      `Items found in cart that are no longer available (were deleted): ${deletedItemsInCart}`
-    ); // DEBUGGING
 
     let warningDetails;
     if (deletedItemsInCart.length > 0) {
+      log(
+        "warn",
+        `Items found in cart that are no longer available (were deleted): ${deletedItemsInCart}`
+      ); // DEBUGGING
+
       // ^ filters deleted items from this.cart.items based on 'deletedItemsInCart'
       const updatedCart = this.cart.items.filter(
         (cartItem) => !deletedItemsInCart.includes(cartItem.productId)
       );
-      log("warn", "Cart successfuly filtered from deleted products"); // DEBUGGING
+      log("info", "Cart successfuly filtered from products no longer existing in DB"); // DEBUGGING
 
       this.cart.items = updatedCart;
       await this.save();
